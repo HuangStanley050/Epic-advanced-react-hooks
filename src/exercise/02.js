@@ -15,15 +15,15 @@ function pokemonInfoReducer(state, action) {
   switch (action.type) {
     case 'pending': {
       // 🐨 replace "pokemon" with "data"
-      return {status: 'pending', pokemon: null, error: null}
+      return {status: 'pending', data: null, error: null}
     }
     case 'resolved': {
       // 🐨 replace "pokemon" with "data" (in the action too!)
-      return {status: 'resolved', pokemon: action.pokemon, error: null}
+      return {status: 'resolved', data: action.data, error: null}
     }
     case 'rejected': {
       // 🐨 replace "pokemon" with "data"
-      return {status: 'rejected', pokemon: null, error: action.error}
+      return {status: 'rejected', data: null, error: action.error}
     }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`)
@@ -31,27 +31,13 @@ function pokemonInfoReducer(state, action) {
   }
 }
 
-function PokemonInfo({pokemonName}) {
-  // 🐨 move both the useReducer and useEffect hooks to a custom hook called useAsync
-  // here's how you use it:
-  // const state = useAsync(
-  //   () => {
-  //     if (!pokemonName) {
-  //       return
-  //     }
-  //     return fetchPokemon(pokemonName)
-  //   },
-  //   {status: pokemonName ? 'pending' : 'idle'},
-  //   [pokemonName],
-  // )
-  // 🐨 so you're job is to create a useAsync function that makes this work.
+function useAsync() {
   const [state, dispatch] = React.useReducer(pokemonInfoReducer, {
     status: pokemonName ? 'pending' : 'idle',
     // 🐨 this will need to be "data" instead of "pokemon"
-    pokemon: null,
+    data: null,
     error: null,
   })
-
   React.useEffect(() => {
     // 💰 this first early-exit bit is a little tricky, so let me give you a hint:
     // const promise = asyncCallback()
@@ -75,6 +61,22 @@ function PokemonInfo({pokemonName}) {
     // 🐨 because of limitations with ESLint, you'll need to ignore
     // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
   }, [pokemonName])
+}
+
+function PokemonInfo({pokemonName}) {
+  // 🐨 move both the useReducer and useEffect hooks to a custom hook called useAsync
+  // here's how you use it:
+  const state = useAsync(
+    () => {
+      if (!pokemonName) {
+        return
+      }
+      return fetchPokemon(pokemonName)
+    },
+    {status: pokemonName ? 'pending' : 'idle'},
+    [pokemonName],
+  )
+  // 🐨 so you're job is to create a useAsync function that makes this work.
 
   // 🐨 this will change from "pokemon" to "data"
   const {pokemon, status, error} = state
