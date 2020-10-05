@@ -31,7 +31,7 @@ function pokemonInfoReducer(state, action) {
   }
 }
 
-function useAsync() {
+function useAsync(func1, {status}, [pokemonName]) {
   const [state, dispatch] = React.useReducer(pokemonInfoReducer, {
     status: pokemonName ? 'pending' : 'idle',
     // 🐨 this will need to be "data" instead of "pokemon"
@@ -79,7 +79,7 @@ function PokemonInfo({pokemonName}) {
   // 🐨 so you're job is to create a useAsync function that makes this work.
 
   // 🐨 this will change from "pokemon" to "data"
-  const {pokemon, status, error} = state
+  const {data, status, error} = state
 
   if (status === 'idle' || !pokemonName) {
     return 'Submit a pokemon'
@@ -88,7 +88,7 @@ function PokemonInfo({pokemonName}) {
   } else if (status === 'rejected') {
     throw error
   } else if (status === 'resolved') {
-    return <PokemonDataView pokemon={pokemon} />
+    return <PokemonDataView pokemon={data} />
   }
 
   throw new Error('This should be impossible')
