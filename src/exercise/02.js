@@ -31,36 +31,36 @@ function pokemonInfoReducer(state, action) {
   }
 }
 
-function useAsync(func1, {status}, [pokemonName]) {
+function useAsync(asyncCallback, initalState, dependencies) {
   const [state, dispatch] = React.useReducer(pokemonInfoReducer, {
-    status: pokemonName ? 'pending' : 'idle',
+    status: 'idle',
     // 🐨 this will need to be "data" instead of "pokemon"
     data: null,
     error: null,
+    ...initalState,
   })
   React.useEffect(() => {
     // 💰 this first early-exit bit is a little tricky, so let me give you a hint:
-    // const promise = asyncCallback()
-    // if (!promise) {
-    //   return
-    // }
-    // then you can dispatch and handle the promise etc...
-    if (!pokemonName) {
+    const promise = asyncCallback()
+    if (!promise) {
       return
     }
+    // then you can dispatch and handle the promise etc...
+
     dispatch({type: 'pending'})
-    fetchPokemon(pokemonName).then(
-      pokemon => {
-        dispatch({type: 'resolved', pokemon})
+    promise.then(
+      data => {
+        dispatch({type: 'resolved', data})
       },
       error => {
         dispatch({type: 'rejected', error})
       },
+      // 🐨 you'll accept dependencies as an array and pass that here.
+      // 🐨 because of limitations with ESLint, you'll need to ignore
+      // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
     )
-    // 🐨 you'll accept dependencies as an array and pass that here.
-    // 🐨 because of limitations with ESLint, you'll need to ignore
-    // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
-  }, [pokemonName])
+  }, dependencies)
+  return state
 }
 
 function PokemonInfo({pokemonName}) {
@@ -79,7 +79,7 @@ function PokemonInfo({pokemonName}) {
   // 🐨 so you're job is to create a useAsync function that makes this work.
 
   // 🐨 this will change from "pokemon" to "data"
-  const {data, status, error} = state
+  const {data: pokemon, status, error} = state
 
   if (status === 'idle' || !pokemonName) {
     return 'Submit a pokemon'
@@ -88,7 +88,7 @@ function PokemonInfo({pokemonName}) {
   } else if (status === 'rejected') {
     throw error
   } else if (status === 'resolved') {
-    return <PokemonDataView pokemon={data} />
+    return <PokemonDataView pokemon={pokemon} />
   }
 
   throw new Error('This should be impossible')
